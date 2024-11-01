@@ -136,9 +136,3 @@ to query the Github GraphQL API for contributions.  See the query below to under
   }
 }
 ```
-
-## CA certs from mozilla
-
-- https://ccadb.my.salesforce-sites.com/mozilla/IncludedRootsPEMTxt?TrustBitsInclude=Websites
-
-
