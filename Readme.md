@@ -1,6 +1,6 @@
 # Github Contributions
 
-Do you have multiple github accounts for different purposes?
+Do you have multiple Github accounts for different purposes?
 Work? Personal? Nym?  If so, you may want to collate your
 contributions in order to see your total statistics.
 
