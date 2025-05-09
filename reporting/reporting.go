@@ -69,13 +69,20 @@ type QueryResult struct {
 	} `graphql:"user(login: $login)"`
 }
 
+// Repository holds a Github repository name and its URL
+type Repository struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+}
+
 // AggregatedResults stores the aggregated results in three fields: totalCommitContributions,
 // totalRepositories, and totalOtherContributions
 type AggregatedResults struct {
-	Timestamp                int `json:"timestamp"`
-	TotalCommitContributions int `json:"totalCommitContributions"`
-	TotalRepositories        int `json:"totalRepositories"`
-	TotalOtherContributions  int `json:"totalOtherContributions"`
+	Timestamp                int          `json:"timestamp"`
+	TotalCommitContributions int          `json:"totalCommitContributions"`
+	TotalRepositories        int          `json:"totalRepositories"`
+	TotalOtherContributions  int          `json:"totalOtherContributions"`
+	Repositories             []Repository `json:"repositories"`
 }
 
 // Represents a Github username and its associated API token string
@@ -184,8 +191,7 @@ func (r *Reporter) Collect() (err error) {
 	return
 }
 
-// report the final results
-// TODO: change this to the aggregated results
+// Reports the final results
 func (r *Reporter) Report() (aggregatedResultsJSON string, err error) {
 
 	aggregatedResults, err := r.Aggregate(&queryResults)
@@ -210,7 +216,10 @@ func (r *Reporter) Report() (aggregatedResultsJSON string, err error) {
 func (r *Reporter) Aggregate(queryResults *map[string]QueryResult) (aggregatedResults AggregatedResults, err error) {
 
 	aggregatedResults = AggregatedResults{}
-	var uniqueRepositories = make(map[string]int)
+	// For counting the contributions
+	var contributionsByRepo = make(map[string]int)
+	// For listing repo URLs by repo name
+	var uniqueRepositories = make(map[string]string)
 
 	for userYear, queryResult := range *queryResults {
 		log.Println(userYear)
@@ -224,23 +233,39 @@ func (r *Reporter) Aggregate(queryResults *map[string]QueryResult) (aggregatedRe
 				int(queryResult.User.ContributionsCollection.TotalPullRequestReviewContributions))
 		// Aggregate total repositories
 		for _, repository := range queryResult.User.ContributionsCollection.CommitContributionsByRepository {
-			uniqueRepositories[string(repository.Repository.Name)] = uniqueRepositories[string(repository.Repository.Name)] + 1
+			contributionsByRepo[string(repository.Repository.Name)] = contributionsByRepo[string(repository.Repository.Name)] + 1
+			uniqueRepositories[string(repository.Repository.Name)] = string(repository.Repository.URL)
 		}
 		for _, repository := range queryResult.User.ContributionsCollection.IssueContributionsByRepository {
-			uniqueRepositories[string(repository.Repository.Name)] = uniqueRepositories[string(repository.Repository.Name)] + 1
+			contributionsByRepo[string(repository.Repository.Name)] = contributionsByRepo[string(repository.Repository.Name)] + 1
+			uniqueRepositories[string(repository.Repository.Name)] = string(repository.Repository.URL)
 		}
 		for _, repository := range queryResult.User.ContributionsCollection.PullRequestContributionsByRepository {
-			uniqueRepositories[string(repository.Repository.Name)] = uniqueRepositories[string(repository.Repository.Name)] + 1
+			contributionsByRepo[string(repository.Repository.Name)] = contributionsByRepo[string(repository.Repository.Name)] + 1
+			uniqueRepositories[string(repository.Repository.Name)] = string(repository.Repository.URL)
 		}
 		for _, repository := range queryResult.User.ContributionsCollection.PullRequestReviewContributionsByRepository {
-			uniqueRepositories[string(repository.Repository.Name)] = uniqueRepositories[string(repository.Repository.Name)] + 1
+			contributionsByRepo[string(repository.Repository.Name)] = contributionsByRepo[string(repository.Repository.Name)] + 1
+			uniqueRepositories[string(repository.Repository.Name)] = string(repository.Repository.URL)
 		}
 	}
-	aggregatedResults.TotalRepositories = len(uniqueRepositories)
+	aggregatedResults.TotalRepositories = len(contributionsByRepo)
 	aggregatedResults.Timestamp = int(time.Now().Unix())
+
+	// A slice of repositories to be added as a list to the results
+	repos := make([]Repository, 0)
+	for key, val := range uniqueRepositories {
+		var repo = Repository{}
+		repo.Name = key
+		repo.URL = val
+		repos = append(repos, repo)
+	}
+
+	aggregatedResults.Repositories = repos
 	return
 }
 
+// Poll periodically queries the Github API (TODO)
 func Poll() {
 	// Periodically poll and cache github statistics
 	ticker := time.NewTicker(time.Minute * PollingIntervalInMinutes)
