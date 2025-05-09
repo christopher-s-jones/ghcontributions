@@ -71,8 +71,30 @@ Running the `ghcontributions` command produces a JSON object, for example:
 {
   "timestamp": 1730498450,
   "totalCommitContributions": 1234,
-  "totalRepositories": 56,
-  "totalOtherContributions": 789
+  "totalRepositories": 5,
+  "totalOtherContributions": 678
+  "repositories": [
+    {
+      "name": "realtime-data",
+      "url": "https://github.com/csjx/realtime-data"
+    },
+    {
+      "name": "dataone-cn-os-core",
+      "url": "https://github.com/DataONEorg/dataone-cn-os-core"
+    },
+    {
+      "name": "metacatui",
+      "url": "https://github.com/NCEAS/metacatui"
+    },
+    {
+      "name": "metrics-service",
+      "url": "https://github.com/DataONEorg/metrics-service"
+    },
+    {
+      "name": "bookkeeper",
+      "url": "https://github.com/DataONEorg/bookkeeper"
+    }
+  ]
 }
 ```
 ## GraphQL reporter
