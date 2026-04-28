@@ -1,0 +1,24 @@
+{
+  "user-2023": {
+    "User": {
+      "Login": "user",
+      "ContributionsCollection": {
+        "TotalCommitContributions": 10,
+        "TotalIssueContributions": 5,
+        "TotalPullRequestContributions": 3,
+        "TotalPullRequestReviewContributions": 2,
+        "CommitContributionsByRepository": [
+          {
+            "Repository": {
+              "Name": "repo1",
+              "URL": "https://github.com/user/repo1"
+            }
+          }
+        ],
+        "IssueContributionsByRepository": [],
+        "PullRequestContributionsByRepository": [],
+        "PullRequestReviewContributionsByRepository": []
+      }
+    }
+  }
+}
