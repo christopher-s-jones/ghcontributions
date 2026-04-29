@@ -1,14 +1,24 @@
 module github.com/christopher-s-jones/ghcontributions
 
-go 1.23.0
-
-require github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
+go 1.26.3
 
 require (
-	github.com/christopher-s-jones/ghcontributions/reporting v0.0.0-00010101000000-000000000000
-	github.com/shurcooL/graphql v0.0.0-20230722043721-ed46e5a46466 // indirect
-	golang.org/x/oauth2 v0.30.0
+	github.com/shurcooL/githubv4 v0.0.0-20260209031235-2402fdf4a9ed
+	github.com/stretchr/testify v1.11.1
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/objx v0.5.3 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
+
+require (
+	github.com/shurcooL/graphql v0.0.0-20240915155400-7ee5256398cf // indirect
+	golang.org/x/oauth2 v0.36.0
 )
 
 replace github.com/christopher-s-jones/ghcontributions => ./ghcontributions
+
 replace github.com/christopher-s-jones/ghcontributions/reporting => ./reporting
