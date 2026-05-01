@@ -1,0 +1,17 @@
+{
+  "testuser-2023": {
+    "User": {
+      "Login": "testuser",
+      "ContributionsCollection": {
+        "TotalCommitContributions": 5,
+        "TotalIssueContributions": 0,
+        "TotalPullRequestContributions": 0,
+        "TotalPullRequestReviewContributions": 0,
+        "CommitContributionsByRepository": [],
+        "IssueContributionsByRepository": [],
+        "PullRequestContributionsByRepository": [],
+        "PullRequestReviewContributionsByRepository": []
+      }
+    }
+  }
+}

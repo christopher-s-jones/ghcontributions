@@ -1,0 +1,32 @@
+{
+  "user1-2022": {
+    "User": {
+      "Login": "user1",
+      "ContributionsCollection": {
+        "TotalCommitContributions": 3,
+        "TotalIssueContributions": 1,
+        "TotalPullRequestContributions": 1,
+        "TotalPullRequestReviewContributions": 0,
+        "HasActivityInThePast": true,
+        "CommitContributionsByRepository": [
+          {
+            "Repository": {
+              "Name": "repo1",
+              "URL": "https://github.com/user/repo1"
+            }
+          }
+        ],
+        "IssueContributionsByRepository": [
+          {
+            "Repository": {
+              "Name": "repo2",
+              "URL": "https://github.com/user/repo2"
+            }
+          }
+        ],
+        "PullRequestContributionsByRepository": [],
+        "PullRequestReviewContributionsByRepository": []
+      }
+    }
+  }
+}
