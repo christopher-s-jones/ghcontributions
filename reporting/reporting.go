@@ -11,6 +11,13 @@ import (
 	"github.com/shurcooL/githubv4"
 )
 
+// The GraphQLClient interface abstracts the Query method in order to support
+// multiple implementations, including a mock for testing and the githubv4 client
+// for actual queries
+type GraphQLClient interface {
+	Query(ctx context.Context, q interface{}, variables map[string]interface{}) error
+}
+
 // A QueryResult represents a Github GraphQL query result that returns select high level fields
 // The User.Login field tag ($login) is configurable with a variables map, as are the
 // User.ContributionCollection field tags ($from and $to).
@@ -100,8 +107,9 @@ type Credentials []Credential
 // “totalOtherContributions“ (an aggregate of total TotalIssueContributions,
 // “totalPullRequestContributions“, and “totalPullRequestReviewContributions“)
 type Reporter struct {
-	// An authenticated Github Client using an OAuth token
-	Client *githubv4.Client
+	// A client that implements the GraphQLClient interface like
+	// an authenticated Github Client using an OAuth token
+	Client GraphQLClient
 	// The Github username login
 	User string
 	// The last year to report statistics (defaults to the current year)
@@ -115,10 +123,10 @@ type Reporter struct {
 // The user is a github username string
 // The firstYear is the first year in the sequence to report
 // The lastYear is the last year in the sequence to report
-func (r *Reporter) NewReporter(client *githubv4.Client, user string, firstYear int, lastYear int) (reporter Reporter, err error) {
+func NewReporter(client GraphQLClient, user string, firstYear int, lastYear int) (reporter Reporter, err error) {
 
 	if user == "" {
-		err = fmt.Errorf("user %s cannot be blank in constructing a query", user)
+		err = fmt.Errorf("user cannot be blank in constructing a query")
 		return Reporter{}, err
 	}
 
@@ -149,19 +157,17 @@ func (r *Reporter) NewReporter(client *githubv4.Client, user string, firstYear i
 	}, err
 }
 
-// Returned query results by username-year
-var queryResults = make(map[string]QueryResult)
-
 // Collects Github contribution statistics via the GraphQL service
 // Returns the results as map of user-year strings to Query objects, and a nil error on success
-func (r *Reporter) Collect() (err error) {
+func (r *Reporter) Collect() (map[string]QueryResult, error) {
 
-	var queryResult = QueryResult{}
+	var queryResults = make(map[string]QueryResult)
 
 	log.Printf("fetching repository statistics...")
 
 	// run the queries
 	for targetYear := r.LastYear; targetYear >= r.FirstYear; targetYear-- {
+		var queryResult = QueryResult{}
 
 		from := time.Date(targetYear, time.January, 1, 0, 0, 0, 0, time.UTC) // {year}-01-01T00:00:00
 		to := from.AddDate(1, 0, 0).Add(-time.Second)                        // {year}-12-31T11:59:59
@@ -175,26 +181,26 @@ func (r *Reporter) Collect() (err error) {
 
 		err := r.Client.Query(context.Background(), &queryResult, variables)
 		if err != nil {
-			log.Fatal(err)
-			return err
+			return queryResults, fmt.Errorf("failed to query github: %w", err)
 		}
 		if githubv4.String(queryResult.User.Login) != "" {
 			userYear := r.User + "-" + strconv.Itoa(targetYear)
 			log.Println(userYear)
 			queryResults[userYear] = queryResult // Store a copy of the user-year results
 		}
+		// Stop if no prior activity exists
 		hasActivityInThePast := queryResult.User.ContributionsCollection.HasActivityInThePast
 		if !hasActivityInThePast {
 			break
 		}
 	}
-	return
+	return queryResults, nil
 }
 
 // Reports the final results
-func (r *Reporter) Report() (aggregatedResultsJSON string, err error) {
+func (r *Reporter) Report(queryResults map[string]QueryResult) (aggregatedResultsJSON string, err error) {
 
-	aggregatedResults, err := r.Aggregate(&queryResults)
+	aggregatedResults, err := r.Aggregate(queryResults)
 	if err != nil {
 		return aggregatedResultsJSON, err
 	}
@@ -213,7 +219,7 @@ func (r *Reporter) Report() (aggregatedResultsJSON string, err error) {
 //     in other ways (issues, pull requests, and pull request reviews).
 //   - totalOtherContributions: The count of all other contributions across all users, including
 //     all issues, pull requests, and pull request reviews.
-func (r *Reporter) Aggregate(queryResults *map[string]QueryResult) (aggregatedResults AggregatedResults, err error) {
+func (r *Reporter) Aggregate(queryResults map[string]QueryResult) (aggregatedResults AggregatedResults, err error) {
 
 	aggregatedResults = AggregatedResults{}
 	// For counting the contributions
@@ -221,7 +227,7 @@ func (r *Reporter) Aggregate(queryResults *map[string]QueryResult) (aggregatedRe
 	// For listing repo URLs by repo name
 	var uniqueRepositories = make(map[string]string)
 
-	for userYear, queryResult := range *queryResults {
+	for userYear, queryResult := range queryResults {
 		log.Println(userYear)
 		// Aggregate total commits
 		aggregatedResults.TotalCommitContributions +=
