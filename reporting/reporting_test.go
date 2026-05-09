@@ -179,7 +179,7 @@ func TestNewReporter(t *testing.T) {
 	}
 }
 
-// Test Aggregate function with fixtures
+// Test the Aggregate function with fixtures
 func TestAggregate(t *testing.T) {
 	tests := []struct {
 		name            string
@@ -216,8 +216,8 @@ func TestAggregate(t *testing.T) {
 			queryResults, err := loadQueryResultsMap(test.fixtureFile)
 			assert.NoError(t, err, "Failed to load fixture: %s", test.fixtureFile)
 
-			r := &rpt.Reporter{}
-			result, err := r.Aggregate(queryResults)
+			reporter := &rpt.Reporter{}
+			result, err := reporter.Aggregate(queryResults)
 
 			assert.NoError(t, err)
 			// Ensure the three main aggregated stats are reported correctly
@@ -232,13 +232,13 @@ func TestAggregate(t *testing.T) {
 	}
 }
 
-// Test the Report function
+// Test the Report method
 func TestReport(t *testing.T) {
 	queryResults, err := loadQueryResultsMap("report_test_data.json")
 	assert.NoError(t, err, "Failed to load report test fixture")
 
-	r := &rpt.Reporter{}
-	jsonStr, err := r.Report(queryResults)
+	reporter := &rpt.Reporter{}
+	jsonStr, err := reporter.Report(queryResults)
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, jsonStr)
@@ -249,7 +249,7 @@ func TestReport(t *testing.T) {
 	assert.Equal(t, 5, result.TotalCommitContributions)
 }
 
-// Test the Collect function
+// Test the Collect method
 func TestCollect(t *testing.T) {
 	// Reset global state before each test
 	// queryResults = make(map[string]QueryResult)
@@ -347,7 +347,7 @@ func TestCredential(t *testing.T) {
 	assert.Equal(t, "testtoken123", cred.Token)
 }
 
-// Test Credentials slice
+// Test the Credentials slice
 func TestCredentials(t *testing.T) {
 	creds := rpt.Credentials{
 		{Username: "user1", Token: "token1"},
@@ -359,7 +359,7 @@ func TestCredentials(t *testing.T) {
 	assert.Equal(t, "token2", creds[1].Token)
 }
 
-// Test Repository struct
+// Test the Repository struct
 func TestRepository(t *testing.T) {
 	repo := rpt.Repository{
 		Name: "myrepo",
@@ -373,8 +373,8 @@ func TestRepository(t *testing.T) {
 	assert.Equal(t, expected, string(jsonData))
 }
 
-// Test QueryResult structure
-func TestQueryResultStructure(t *testing.T) {
+// Test the QueryResult struct
+func TestQueryResult(t *testing.T) {
 	result := rpt.QueryResult{}
 	result.User.Login = "testuser"
 	result.User.ContributionsCollection.TotalCommitContributions = 42
@@ -383,7 +383,7 @@ func TestQueryResultStructure(t *testing.T) {
 	assert.Equal(t, githubv4.Int(42), result.User.ContributionsCollection.TotalCommitContributions)
 }
 
-// Benchmark Aggregate function
+// Benchmark the Aggregate function
 func BenchmarkAggregate(b *testing.B) {
 	queryResults, err := loadQueryResultsMap("benchmark_data.json")
 	if err != nil {
