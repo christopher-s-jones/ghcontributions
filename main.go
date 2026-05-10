@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"maps"
 	"os"
 	"os/exec"
 	"time"
@@ -50,22 +51,24 @@ func main() {
 
 	// List repositories for each user and get statistics
 	var reporter reporting.Reporter
+	var queryResultsByUser = make(map[string]reporting.QueryResult)
 	for _, credential := range *credentials {
 		src := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: credential.Token})
 		httpClient := oauth2.NewClient(context.Background(), src)
 		apiClient := githubv4.NewClient(httpClient)
 		firstYear := config.firstReportingYear
 		lastYear := config.lastReportingYear
-		reporter, err = reporter.NewReporter(apiClient, credential.Username, firstYear, lastYear)
+		reporter, err = reporting.NewReporter(apiClient, credential.Username, firstYear, lastYear)
 		if err != nil {
 			log.Fatalf("Couldn't create a reporter object: %s", err)
 		}
-		err = reporter.Collect()
+		queryResults, err := reporter.Collect()
+		maps.Copy(queryResultsByUser, queryResults)
 		if err != nil {
 			log.Print(err)
 		}
 	}
-	aggregatedResults, _ := reporter.Report()
+	aggregatedResults, _ := reporter.Report(queryResultsByUser)
 	log.Print(aggregatedResults)
 }
 
