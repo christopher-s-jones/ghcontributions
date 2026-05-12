@@ -3,11 +3,10 @@ name: Github Contribution Tests
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
   test:
+    name: ghcontributions test suite
     runs-on: ubununtu-latest
 
     strategy:
