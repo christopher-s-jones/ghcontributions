@@ -6,8 +6,8 @@ on:
 
 jobs:
   test:
-    name: ghcontributions test suite
-    runs-on: ubununtu-latest
+    name: Run test suite
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
